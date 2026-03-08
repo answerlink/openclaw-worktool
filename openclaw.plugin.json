@@ -1,0 +1,9 @@
+{
+  "id": "worktool",
+  "channels": ["worktool"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

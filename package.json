@@ -1,0 +1,22 @@
+{
+  "name": "@local/worktool",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "openclaw": {
+    "extensions": ["./index.js"],
+    "channel": {
+      "id": "worktool",
+      "label": "WorkTool",
+      "selectionLabel": "WorkTool Bridge",
+      "docsPath": "/channels/worktool",
+      "docsLabel": "worktool",
+      "blurb": "Bridge outbound replies to a WorkTool middleware endpoint",
+      "order": 96
+    },
+    "install": {
+      "localPath": "extensions/worktool",
+      "defaultChoice": "local"
+    }
+  }
+}
