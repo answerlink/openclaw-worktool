@@ -1,8 +1,29 @@
 {
-  "name": "@local/worktool",
-  "version": "0.1.0",
-  "private": true,
+  "name": "openclaw-plugin-worktool",
+  "version": "0.2.0",
+  "description": "OpenClaw WorkTool channel plugin for WeChat webhook/RPA bridge integration.",
   "type": "module",
+  "files": [
+    "index.js",
+    "openclaw.plugin.json",
+    "src/*.js",
+    "README.md",
+    "CHANGELOG.md",
+    "DEPLOYMENT.md",
+    "LICENSE",
+    "docs/"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "node scripts/build.mjs",
+    "pack": "npm pack ./dist/package --pack-destination ./dist",
+    "verify:pack": "node scripts/verify-pack.mjs",
+    "release:local": "npm run build && npm run pack && npm run verify:pack",
+    "release": "node scripts/release.mjs"
+  },
   "openclaw": {
     "extensions": ["./index.js"],
     "channel": {
@@ -15,6 +36,7 @@
       "order": 96
     },
     "install": {
+      "npmSpec": "openclaw-plugin-worktool",
       "localPath": "extensions/worktool",
       "defaultChoice": "local"
     }

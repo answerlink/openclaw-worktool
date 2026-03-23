@@ -1,87 +1,69 @@
 # Deployment Guide
 
-本文档描述如何将 `openclaw-plugin-worktool` 以本地插件方式接入 OpenClaw。
+本文档描述 `openclaw-plugin-worktool` 在 webhook 模式下的部署与联调。
 
-## 1. Clone Repository
-
-```bash
-git clone <your-repo-url>
-cd openclaw-plugin-worktool
-```
-
-## 2. Install Dependencies
+## 1. 插件安装
 
 ```bash
-npm install
+openclaw plugins install /absolute/path/openclaw-plugin-worktool
 ```
 
-> 当前仓库主要提供运行时代码；如果后续增加构建流程，请在此基础上补充 `npm run build`。
+## 2. OpenClaw 配置
 
-## 3. Place Plugin Into OpenClaw Extensions
+至少保证以下字段可用：
 
-按 `package.json` 里的约定，默认本地安装路径是：
+- `channels.worktool.robotId`
+- `channels.worktool.bridgeBaseUrl`
+- `channels.worktool.webhookHost`（建议 `0.0.0.0`）
+- `channels.worktool.webhookPort`（你的场景为 `18799`）
+- `channels.worktool.webhookPath`（你的场景为 `/wechat/webhook`）
 
-```text
-extensions/worktool
-```
+## 3. 反向代理（你当前现状）
 
-将本仓库放到 OpenClaw 工作目录对应的 `extensions/worktool` 下，或建立软链接（推荐开发阶段）：
+示例：
+
+- `https://your-public-domain.example.com/wechat/webhook`
+- `-> 10.21.8.6:18799/wechat/webhook`
+
+确保代理透传：
+
+- `Content-Type: application/json`
+- `x-worktool-token`（若你启用 token）
+
+## 4. 启动与验证
+
+1. 启动 OpenClaw（并确保 worktool 渠道网关已启动）。
+2. 访问健康检查：
 
 ```bash
-ln -s /absolute/path/openclaw-plugin-worktool /absolute/path/to/openclaw/extensions/worktool
+curl -i https://your-public-domain.example.com/wechat/webhook
 ```
 
-## 4. Configure OpenClaw
+3. 发送最简回调：
 
-在 OpenClaw 配置中添加：
-
-```json
-{
-  "channels": {
-    "worktool": {
-      "robotId": "robot-001",
-      "bridgeBaseUrl": "http://127.0.0.1:9000"
-    }
-  }
-}
+```bash
+curl -X POST 'https://your-public-domain.example.com/wechat/webhook' \
+  -H 'Content-Type: application/json' \
+  -H 'x-worktool-token: 893724599f7244febceeb66b03825677' \
+  -d '{"spoken":"部署联调消息","rawSpoken":"部署联调消息","receivedName":"仑哥","groupName":"测试群1","groupRemark":"测试群1备注名","roomType":"1","atMe":true,"textType":"1","fileBase64":""}'
 ```
 
-多账号配置示例：
+4. 检查日志关键字：
 
-```json
-{
-  "channels": {
-    "worktool": {
-      "robotId": "robot-default",
-      "bridgeBaseUrl": "http://127.0.0.1:9000",
-      "accounts": {
-        "ops": {
-          "name": "Ops Bot",
-          "enabled": true,
-          "robotId": "robot-ops",
-          "bridgeBaseUrl": "http://127.0.0.1:9000"
-        }
-      }
-    }
-  }
-}
-```
+- `webhook server listening`
+- `inbound dispatched message=`
+- bridge 成功回包
 
-## 5. Start And Verify
+## 5. 常见问题
 
-1. 启动 WorkTool bridge 服务，并确保能从 OpenClaw 进程访问。
-2. 启动 OpenClaw。
-3. 在 OpenClaw 中选择 `WorkTool Bridge` 渠道发送一条消息。
-4. 若失败，优先检查：
-   - `robotId` 是否正确
-   - `bridgeBaseUrl` 是否可访问
-   - `receiver` 是否为可识别的群名或用户备注
+- `401 unauthorized`
+  - 配置了 `webhookToken` 但请求缺少 `x-worktool-token`。
 
-## Troubleshooting
+- `415 content-type must be application/json`
+  - 请求头不是 `application/json`。
 
-- `worktool channel not configured: require robotId + bridgeBaseUrl`
-  - 配置缺少 `robotId` 或 `bridgeBaseUrl`。
-- `worktool bridge error 4xx/5xx`
-  - bridge 服务返回错误，检查 bridge 日志和请求体字段。
-- 请求超时
-  - 当前超时为 15 秒，检查网络连通性或 bridge 负载。
+- `unsupported inbound payload`
+  - 回调体中无法提取 `text/senderId/chatId`。
+
+- `worktool channel not configured`
+  - 缺少 `robotId` 或 `bridgeBaseUrl`。
