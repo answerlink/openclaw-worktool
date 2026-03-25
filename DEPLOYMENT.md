@@ -4,6 +4,36 @@
 
 ## 1. 插件安装
 
+推荐一键安装：
+
+```bash
+ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+```
+
+本地源码一键安装（clone 后，Docker 推荐）：
+
+```bash
+git clone https://github.com/answerlink/openclaw-plugin-worktool.git
+cd openclaw-plugin-worktool
+ROBOT_ID=wc11a bash scripts/install-local.sh
+```
+
+上面命令默认走 docker 模式（等价 `scripts/install-local-docker.sh`）。
+
+本地源码一键安装（非 Docker，可选）：
+
+```bash
+ROBOT_ID=wc11a bash scripts/install-local-native.sh
+```
+
+如需安装指定版本：
+
+```bash
+ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+```
+
+开发联调可用本地目录安装：
+
 ```bash
 openclaw plugins install /absolute/path/openclaw-plugin-worktool
 ```
@@ -18,12 +48,21 @@ openclaw plugins install /absolute/path/openclaw-plugin-worktool
 - `channels.worktool.webhookPort`（你的场景为 `18799`）
 - `channels.worktool.webhookPath`（你的场景为 `/wechat/webhook`）
 
+如果你是 Docker 部署，还需要先配置模型 `.env`（与 `docker-compose.worktool.yml` 同级）：
+
+```dotenv
+MODEL_ID=claw-primary
+MODEL_BASE_URL=http://127.0.0.1:13030/v1
+MODEL_API_KEY=dummy_key
+MODEL_API_PROTOCOL=openai-completions
+```
+
 ## 3. 反向代理（你当前现状）
 
 示例：
 
 - `https://your-public-domain.example.com/wechat/webhook`
-- `-> 10.21.8.6:18799/wechat/webhook`
+- `-> 127.0.0.1:18799/wechat/webhook`
 
 确保代理透传：
 
@@ -53,6 +92,12 @@ curl -X POST 'https://your-public-domain.example.com/wechat/webhook' \
 - `webhook server listening`
 - `inbound dispatched message=`
 - bridge 成功回包
+
+5. 可视化页（可选）：
+
+- 在浏览器访问：
+  - `https://your-public-domain.example.com/wechat/admin?robotId=<robotId>`
+- 用于在线改 `robotId / bridgeBaseUrl / webhook` 参数并发送测试回调。
 
 ## 5. 常见问题
 

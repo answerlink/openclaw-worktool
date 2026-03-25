@@ -2,6 +2,54 @@
 
 本文档用于把 `openclaw-plugin-worktool` 做成可分发安装包（参考 `openclaw-lark` 的发布方式）。
 
+## 0. 用户一键安装
+
+latest：
+
+```bash
+ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+```
+
+指定版本：
+
+```bash
+ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+```
+
+clone 后本地一键安装（Docker 推荐）：
+
+```bash
+git clone https://github.com/answerlink/openclaw-plugin-worktool.git
+cd openclaw-plugin-worktool
+ROBOT_ID=wc11a bash scripts/install-local.sh
+```
+
+`install-local.sh` 默认使用 docker 模式（等价 `scripts/install-local-docker.sh`）。
+
+如需显式指定 docker 配置路径：
+
+```bash
+ROBOT_ID=wc11a \
+OPENCLAW_CONFIG=/path/to/runtime/config/openclaw.json \
+COMPOSE_FILE=/path/to/docker-compose.worktool.yml \
+bash scripts/install-local-docker.sh
+```
+
+clone 后本地一键安装（非 Docker，可选）：
+
+```bash
+ROBOT_ID=wc11a bash scripts/install-local-native.sh
+```
+
+Docker 用户安装前，请先准备模型 `.env`（与 compose 文件同级）：
+
+```dotenv
+MODEL_ID=claw-primary
+MODEL_BASE_URL=http://127.0.0.1:13030/v1
+MODEL_API_KEY=dummy_key
+MODEL_API_PROTOCOL=openai-completions
+```
+
 ## 1. 发布前检查
 
 - 确认 `index.js` / `src/*.js` 为最新运行代码。

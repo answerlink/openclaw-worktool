@@ -7,64 +7,23 @@ if ! command -v openclaw >/dev/null 2>&1; then
   exit 1
 fi
 
-REPO="${REPO:-answerlink/openclaw-plugin-worktool}"
-VERSION="${VERSION:-latest}" # e.g. 0.2.1 or latest
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROBOT_ID="${ROBOT_ID:-}"
 BRIDGE_BASE_URL="${BRIDGE_BASE_URL:-https://api.worktool.ymdyes.cn}"
 WEBHOOK_HOST="${WEBHOOK_HOST:-0.0.0.0}"
 WEBHOOK_PORT="${WEBHOOK_PORT:-18799}"
 WEBHOOK_PATH="${WEBHOOK_PATH:-/wechat/webhook}"
 OPENCLAW_CONFIG="${OPENCLAW_CONFIG:-$HOME/.openclaw/openclaw.json}"
-TMP_DIR="$(mktemp -d)"
-ARCHIVE_PATH="$TMP_DIR/worktool-plugin.tgz"
-
-cleanup() {
-  rm -rf "$TMP_DIR"
-}
-trap cleanup EXIT
-
-resolve_version() {
-  if [ "$VERSION" != "latest" ]; then
-    echo "$VERSION"
-    return 0
-  fi
-  local tag
-  tag="$(
-    curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
-      | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p' \
-      | head -n 1
-  )"
-  if [ -z "$tag" ]; then
-    echo "Failed to resolve latest release version from GitHub." >&2
-    exit 1
-  fi
-  echo "${tag#v}"
-}
 
 if [ -z "$ROBOT_ID" ]; then
   echo "ROBOT_ID is required."
   echo "Example:"
-  echo "  ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/${REPO}/main/scripts/install.sh | bash"
+  echo "  ROBOT_ID=wc11a bash scripts/install-local-native.sh"
   exit 1
 fi
 
-VER="$(resolve_version)"
-URL="https://github.com/${REPO}/releases/download/v${VER}/openclaw-plugin-worktool-${VER}.tgz"
-
-echo "Downloading plugin package ${VER} from ${REPO}..."
-curl -fsSL "$URL" -o "$ARCHIVE_PATH"
-
-echo "Extracting release package..."
-tar -xzf "$ARCHIVE_PATH" -C "$TMP_DIR"
-PLUGIN_DIR="$TMP_DIR/package"
-
-if [ ! -d "$PLUGIN_DIR" ]; then
-  echo "Failed to locate extracted plugin package directory."
-  exit 1
-fi
-
-echo "Installing with OpenClaw..."
-openclaw plugins install "$PLUGIN_DIR"
+echo "Installing plugin from local source: $ROOT_DIR"
+openclaw plugins install "$ROOT_DIR"
 
 if ! command -v node >/dev/null 2>&1; then
   echo "Node.js is required to patch ${OPENCLAW_CONFIG} automatically."
@@ -79,6 +38,7 @@ if [ ! -f "$OPENCLAW_CONFIG" ]; then
 fi
 
 echo "Patching OpenClaw config: $OPENCLAW_CONFIG"
+export ROBOT_ID BRIDGE_BASE_URL WEBHOOK_HOST WEBHOOK_PORT WEBHOOK_PATH OPENCLAW_CONFIG
 node - <<'NODE'
 const fs = require("fs");
 
@@ -95,7 +55,7 @@ cfg.plugins.entries = cfg.plugins.entries || {};
 cfg.plugins.entries.worktool = cfg.plugins.entries.worktool || { enabled: true, config: {} };
 cfg.plugins.entries.worktool.enabled = true;
 cfg.plugins.installs = cfg.plugins.installs || {};
-cfg.plugins.installs.worktool = cfg.plugins.installs.worktool || { source: "npm" };
+cfg.plugins.installs.worktool = cfg.plugins.installs.worktool || { source: "path" };
 cfg.plugins.allow = Array.isArray(cfg.plugins.allow) ? cfg.plugins.allow : [];
 if (!cfg.plugins.allow.includes("worktool")) cfg.plugins.allow.push("worktool");
 
@@ -111,7 +71,7 @@ cfg.channels.worktool.webhookPath = webhookPath;
 fs.writeFileSync(path, JSON.stringify(cfg, null, 2));
 NODE
 
-echo "Done."
+echo "Done (native mode)."
 echo "Configured channels.worktool:"
 echo "  robotId=${ROBOT_ID}"
 echo "  bridgeBaseUrl=${BRIDGE_BASE_URL}"
