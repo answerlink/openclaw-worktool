@@ -7,7 +7,29 @@ OpenClaw 的 WorkTool 渠道插件，支持：
 
 ## 安装
 
-方式 1：一键安装（飞书同款，用户无需看源码）
+方式 1：一键安装（Docker 用户推荐，无需 openclaw CLI）
+
+```bash
+ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+```
+
+安装指定版本：
+
+```bash
+ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+```
+
+如果你的 `docker-compose.worktool.yml` 或配置目录不在当前目录，可传参：
+
+```bash
+ROBOT_ID=wc11a \
+COMPOSE_FILE=/path/to/docker-compose.worktool.yml \
+OPENCLAW_CONFIG=/path/to/runtime/config/openclaw.json \
+PLUGIN_HOST_DIR=/path/to/openclaw-plugin-worktool \
+curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+```
+
+方式 2：一键安装（CLI 模式，需要本机有 `openclaw` 命令）
 
 ```bash
 ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
@@ -26,7 +48,7 @@ ROBOT_ID=wc11a BRIDGE_BASE_URL=https://your-private-worktool.example.com \
 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
-方式 2：源码一键安装（clone 后本地自测）
+方式 3：源码一键安装（clone 后本地自测）
 
 ```bash
 git clone https://github.com/answerlink/openclaw-plugin-worktool.git
@@ -62,13 +84,13 @@ ROBOT_ID=wc11a bash scripts/install-local-native.sh
 - 回调地址通常是：`https://your-public-domain.example.com/wechat/webhook`
 - 需要模型配置可用（OpenClaw provider 可调用），否则只能收消息不能出 AI 回复。
 
-方式 3：源码目录安装（开发联调）
+方式 4：源码目录安装（开发联调）
 
 ```bash
 openclaw plugins install /absolute/path/openclaw-plugin-worktool
 ```
 
-方式 4：发布包安装（给私有部署环境）
+方式 5：发布包安装（给私有部署环境）
 
 ```bash
 cd /absolute/path/openclaw-plugin-worktool

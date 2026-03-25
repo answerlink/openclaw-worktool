@@ -7,10 +7,22 @@
 latest：
 
 ```bash
+ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+```
+
+CLI 模式（需要本机有 `openclaw` 命令）：
+
+```bash
 ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
 指定版本：
+
+```bash
+ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+```
+
+CLI 模式指定版本：
 
 ```bash
 ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
