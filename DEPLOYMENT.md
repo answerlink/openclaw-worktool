@@ -15,7 +15,7 @@ curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool
 CLI 一键安装（需要本机有 `openclaw` 命令）：
 
 ```bash
-ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
 本地源码一键安装（clone 后，Docker 推荐）：
@@ -23,7 +23,7 @@ ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-
 ```bash
 git clone https://github.com/answerlink/openclaw-plugin-worktool.git
 cd openclaw-plugin-worktool
-ROBOT_ID=wc11a bash scripts/install-local.sh
+ROBOT_ID=wctestid bash scripts/install-local.sh
 ```
 
 上面命令默认走 docker 模式（等价 `scripts/install-local-docker.sh`）。
@@ -31,13 +31,13 @@ ROBOT_ID=wc11a bash scripts/install-local.sh
 本地源码一键安装（非 Docker，可选）：
 
 ```bash
-ROBOT_ID=wc11a bash scripts/install-local-native.sh
+ROBOT_ID=wctestid bash scripts/install-local-native.sh
 ```
 
 如需安装指定版本：
 
 ```bash
-ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
 开发联调可用本地目录安装：

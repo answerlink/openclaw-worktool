@@ -44,7 +44,7 @@ resolve_version() {
 if [ -z "$ROBOT_ID" ]; then
   echo "ROBOT_ID is required."
   echo "Example:"
-  echo "  ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/${REPO}/main/scripts/install.sh | bash"
+  echo "  ROBOT_ID=wctestid curl -fsSL https://raw.githubusercontent.com/${REPO}/main/scripts/install.sh | bash"
   exit 1
 fi
 

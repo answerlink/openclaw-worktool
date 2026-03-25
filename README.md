@@ -28,7 +28,7 @@ VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-p
 如果你的 `docker-compose.worktool.yml` 或配置目录不在当前目录，可传参：
 
 ```bash
-ROBOT_ID=wc11a \
+ROBOT_ID=wctestid \
 COMPOSE_FILE=/path/to/docker-compose.worktool.yml \
 OPENCLAW_CONFIG=/path/to/runtime/config/openclaw.json \
 PLUGIN_HOST_DIR=/path/to/openclaw-plugin-worktool \
@@ -38,19 +38,19 @@ curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool
 方式 2：一键安装（CLI 模式，需要本机有 `openclaw` 命令）
 
 ```bash
-ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
 安装指定版本：
 
 ```bash
-ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
 可选覆盖 WorkTool 地址（私有化部署）：
 
 ```bash
-ROBOT_ID=wc11a BRIDGE_BASE_URL=https://your-private-worktool.example.com \
+ROBOT_ID=wctestid BRIDGE_BASE_URL=https://your-private-worktool.example.com \
 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
@@ -59,7 +59,7 @@ curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool
 ```bash
 git clone https://github.com/answerlink/openclaw-plugin-worktool.git
 cd openclaw-plugin-worktool
-ROBOT_ID=wc11a bash scripts/install-local.sh
+ROBOT_ID=wctestid bash scripts/install-local.sh
 ```
 
 `install-local.sh` 默认是 `Docker` 模式（推荐，本地 docker 运行 OpenClaw 的场景）：
@@ -73,7 +73,7 @@ ROBOT_ID=wc11a bash scripts/install-local.sh
 源码一键安装（非 Docker，可选）：
 
 ```bash
-ROBOT_ID=wc11a bash scripts/install-local-native.sh
+ROBOT_ID=wctestid bash scripts/install-local-native.sh
 ```
 
 一键安装脚本会自动写入 OpenClaw 配置（native 默认 `~/.openclaw/openclaw.json`，docker 默认 `../runtime/config/openclaw.json`）的以下字段：

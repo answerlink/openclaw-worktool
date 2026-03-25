@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool
 CLI 模式（需要本机有 `openclaw` 命令）：
 
 ```bash
-ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
 指定版本：
@@ -25,7 +25,7 @@ VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-p
 CLI 模式指定版本：
 
 ```bash
-ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
 ```
 
 clone 后本地一键安装（Docker 推荐）：
@@ -33,7 +33,7 @@ clone 后本地一键安装（Docker 推荐）：
 ```bash
 git clone https://github.com/answerlink/openclaw-plugin-worktool.git
 cd openclaw-plugin-worktool
-ROBOT_ID=wc11a bash scripts/install-local.sh
+ROBOT_ID=wctestid bash scripts/install-local.sh
 ```
 
 `install-local.sh` 默认使用 docker 模式（等价 `scripts/install-local-docker.sh`）。
@@ -41,7 +41,7 @@ ROBOT_ID=wc11a bash scripts/install-local.sh
 如需显式指定 docker 配置路径：
 
 ```bash
-ROBOT_ID=wc11a \
+ROBOT_ID=wctestid \
 OPENCLAW_CONFIG=/path/to/runtime/config/openclaw.json \
 COMPOSE_FILE=/path/to/docker-compose.worktool.yml \
 bash scripts/install-local-docker.sh
@@ -50,7 +50,7 @@ bash scripts/install-local-docker.sh
 clone 后本地一键安装（非 Docker，可选）：
 
 ```bash
-ROBOT_ID=wc11a bash scripts/install-local-native.sh
+ROBOT_ID=wctestid bash scripts/install-local-native.sh
 ```
 
 Docker 用户安装前，请先准备模型 `.env`（与 compose 文件同级）：

@@ -18,7 +18,7 @@ OPENCLAW_CONFIG="${OPENCLAW_CONFIG:-$HOME/.openclaw/openclaw.json}"
 if [ -z "$ROBOT_ID" ]; then
   echo "ROBOT_ID is required."
   echo "Example:"
-  echo "  ROBOT_ID=wc11a bash scripts/install-local-native.sh"
+  echo "  ROBOT_ID=wctestid bash scripts/install-local-native.sh"
   exit 1
 fi
 

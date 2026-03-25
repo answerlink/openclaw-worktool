@@ -17,7 +17,7 @@ AUTO_RESTART="${AUTO_RESTART:-1}"
 if [ -z "$ROBOT_ID" ]; then
   echo "ROBOT_ID is required."
   echo "Example:"
-  echo "  ROBOT_ID=wc11a bash scripts/install-local-docker.sh"
+  echo "  ROBOT_ID=wctestid bash scripts/install-local-docker.sh"
   exit 1
 fi
 
