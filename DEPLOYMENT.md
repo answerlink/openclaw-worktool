@@ -7,8 +7,10 @@
 推荐一键安装：
 
 ```bash
-ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
 ```
+
+脚本会优先读取 `.env`，缺失项自动交互询问并回写 `.env`。
 
 CLI 一键安装（需要本机有 `openclaw` 命令）：
 

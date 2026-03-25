@@ -10,13 +10,19 @@ OpenClaw 的 WorkTool 渠道插件，支持：
 方式 1：一键安装（Docker 用户推荐，无需 openclaw CLI）
 
 ```bash
-ROBOT_ID=wc11a curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
 ```
+
+说明：
+
+- 脚本优先读取当前目录 `.env`。
+- 缺失关键项会交互询问（`ROBOT_ID / PUBLIC_BASE_URL / MODEL_*`），并自动回写 `.env`。
+- 也可提前传环境变量实现无交互安装（适合自动化）。
 
 安装指定版本：
 
 ```bash
-ROBOT_ID=wc11a VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
 ```
 
 如果你的 `docker-compose.worktool.yml` 或配置目录不在当前目录，可传参：
