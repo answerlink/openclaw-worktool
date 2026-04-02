@@ -1,38 +1,38 @@
 # WorkTool 插件发布与安装
 
-本文档用于把 `openclaw-plugin-worktool` 做成可分发安装包（参考 `openclaw-lark` 的发布方式）。
+本文档用于把 `openclaw-worktool` 做成可分发安装包（参考 `openclaw-lark` 的发布方式）。
 
 ## 0. 用户一键安装
 
 latest：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/install-docker.sh | bash
 ```
 
 CLI 模式（需要本机有 `openclaw` 命令）：
 
 ```bash
-ROBOT_ID=wctestid curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/install.sh | bash
 ```
 
 指定版本：
 
 ```bash
-VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/install-docker.sh | bash
 ```
 
 CLI 模式指定版本：
 
 ```bash
-ROBOT_ID=wctestid VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/install.sh | bash
 ```
 
 clone 后本地一键安装（Docker 推荐）：
 
 ```bash
-git clone https://github.com/answerlink/openclaw-plugin-worktool.git
-cd openclaw-plugin-worktool
+git clone https://github.com/answerlink/openclaw-worktool.git
+cd openclaw-worktool
 ROBOT_ID=wctestid bash scripts/install-local.sh
 ```
 
@@ -73,7 +73,7 @@ MODEL_API_PROTOCOL=openai-completions
 ## 2. 构建发布目录
 
 ```bash
-cd /absolute/path/openclaw-plugin-worktool
+cd /absolute/path/openclaw-worktool
 npm run build
 ```
 
@@ -89,14 +89,14 @@ npm run build
 ## 3. 生成 tgz 发布包
 
 ```bash
-cd /absolute/path/openclaw-plugin-worktool
+cd /absolute/path/openclaw-worktool
 npm run release:local
 ```
 
 产物：
 
 - `dist/package/`（目录安装）
-- `dist/openclaw-plugin-worktool-<version>.tgz`（单文件分发）
+- `dist/openclaw-worktool-<version>.tgz`（单文件分发）
 
 如需自动升级版本后发布：
 
@@ -130,13 +130,13 @@ git push origin v0.2.1
 目录安装：
 
 ```bash
-openclaw plugins install /absolute/path/openclaw-plugin-worktool/dist/package
+openclaw plugins install /absolute/path/openclaw-worktool/dist/package
 ```
 
 tgz 安装：
 
 ```bash
-openclaw plugins install /absolute/path/openclaw-plugin-worktool/dist/openclaw-plugin-worktool-<version>.tgz
+openclaw plugins install /absolute/path/openclaw-worktool/dist/openclaw-worktool-<version>.tgz
 ```
 
 ## 5. 最小验收

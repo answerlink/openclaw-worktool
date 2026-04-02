@@ -17,7 +17,7 @@ Nginx
   v
 宿主机 OpenClaw 进程
   |
-  +-- openclaw-plugin-worktool
+  +-- openclaw-worktool
       |
       +-- index.ts/js
       |    - 注册 channel(worktool)

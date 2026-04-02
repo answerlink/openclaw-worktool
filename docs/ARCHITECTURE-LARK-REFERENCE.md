@@ -1,6 +1,6 @@
 # WorkTool 插件架构说明（参考 openclaw-lark）
 
-本文档记录 `openclaw-plugin-worktool` 的目录边界，并对齐 `~/projects/openclaw-lark` 的分层思路，供后续持续演进。
+本文档记录 `openclaw-worktool` 的目录边界，并对齐 `~/projects/openclaw-lark` 的分层思路，供后续持续演进。
 
 ## 1. 参考飞书插件的分层边界
 

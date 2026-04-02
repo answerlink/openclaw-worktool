@@ -7,17 +7,29 @@ build/
 coverage/
 *.tsbuildinfo
 
-# local env
+# local env / secrets
 .env
 .env.*
 !.env.example
-.runtime_test/
+*.key
+*.pem
+
+# openclaw runtime config (contains robotId, API keys, tokens)
+openclaw.json
+openclaw.json.bak
+runtime/
+.openclaw/
 
 # logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
 
-# macOS
+# test artifacts
+.runtime_test/
+
+# OS
 .DS_Store
+Thumbs.db

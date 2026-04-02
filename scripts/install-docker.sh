@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="${REPO:-answerlink/openclaw-plugin-worktool}"
+REPO="${REPO:-answerlink/openclaw-worktool}"
 VERSION="${VERSION:-latest}" # e.g. 0.2.1 or latest
 
 # Core WorkTool channel settings
@@ -23,7 +23,7 @@ ENV_FILE="${ENV_FILE:-./.env}"
 COMPOSE_FILE="${COMPOSE_FILE:-./docker-compose.worktool.yml}"
 SERVICE_NAME="${SERVICE_NAME:-openclaw-worktool}"
 OPENCLAW_CONFIG="${OPENCLAW_CONFIG:-./runtime/config/openclaw.json}"
-PLUGIN_HOST_DIR="${PLUGIN_HOST_DIR:-./openclaw-plugin-worktool}"
+PLUGIN_HOST_DIR="${PLUGIN_HOST_DIR:-./openclaw-worktool}"
 CONTAINER_PLUGIN_PATH="${CONTAINER_PLUGIN_PATH:-/app/extensions/worktool}"
 AUTO_RESTART="${AUTO_RESTART:-1}"
 
@@ -218,7 +218,7 @@ upsert_env WEBHOOK_PORT "$WEBHOOK_PORT"
 upsert_env WEBHOOK_PATH "$WEBHOOK_PATH"
 
 VER="$(resolve_version)"
-URL="https://github.com/${REPO}/releases/download/v${VER}/openclaw-plugin-worktool-${VER}.tgz"
+URL="https://github.com/${REPO}/releases/download/v${VER}/openclaw-worktool-${VER}.tgz"
 
 echo "Downloading plugin package ${VER} from ${REPO}..."
 curl -fsSL "$URL" -o "$ARCHIVE_PATH"

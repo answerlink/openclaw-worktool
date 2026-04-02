@@ -1,5 +1,5 @@
 {
-  "name": "openclaw-plugin-worktool",
+  "name": "openclaw-worktool",
   "version": "0.2.0",
   "description": "OpenClaw WorkTool channel plugin for WeChat webhook/RPA bridge integration.",
   "type": "module",
@@ -36,7 +36,7 @@
       "order": 96
     },
     "install": {
-      "npmSpec": "openclaw-plugin-worktool",
+      "npmSpec": "openclaw-worktool",
       "localPath": "extensions/worktool",
       "defaultChoice": "local"
     }

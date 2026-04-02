@@ -7,7 +7,7 @@ if ! command -v openclaw >/dev/null 2>&1; then
   exit 1
 fi
 
-REPO="${REPO:-answerlink/openclaw-plugin-worktool}"
+REPO="${REPO:-answerlink/openclaw-worktool}"
 VERSION="${VERSION:-latest}" # e.g. 0.2.1 or latest
 ROBOT_ID="${ROBOT_ID:-}"
 BRIDGE_BASE_URL="${BRIDGE_BASE_URL:-https://api.worktool.ymdyes.cn}"
@@ -49,7 +49,7 @@ if [ -z "$ROBOT_ID" ]; then
 fi
 
 VER="$(resolve_version)"
-URL="https://github.com/${REPO}/releases/download/v${VER}/openclaw-plugin-worktool-${VER}.tgz"
+URL="https://github.com/${REPO}/releases/download/v${VER}/openclaw-worktool-${VER}.tgz"
 
 echo "Downloading plugin package ${VER} from ${REPO}..."
 curl -fsSL "$URL" -o "$ARCHIVE_PATH"

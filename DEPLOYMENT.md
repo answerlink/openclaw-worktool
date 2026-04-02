@@ -1,13 +1,13 @@
 # Deployment Guide
 
-本文档描述 `openclaw-plugin-worktool` 在 webhook 模式下的部署与联调。
+本文档描述 `openclaw-worktool` 在 webhook 模式下的部署与联调。
 
 ## 1. 插件安装
 
 推荐一键安装：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install-docker.sh | bash
+curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/install-docker.sh | bash
 ```
 
 脚本会优先读取 `.env`，缺失项自动交互询问并回写 `.env`。
@@ -15,14 +15,14 @@ curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool
 CLI 一键安装（需要本机有 `openclaw` 命令）：
 
 ```bash
-ROBOT_ID=wctestid curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/install.sh | bash
 ```
 
 本地源码一键安装（clone 后，Docker 推荐）：
 
 ```bash
-git clone https://github.com/answerlink/openclaw-plugin-worktool.git
-cd openclaw-plugin-worktool
+git clone https://github.com/answerlink/openclaw-worktool.git
+cd openclaw-worktool
 ROBOT_ID=wctestid bash scripts/install-local.sh
 ```
 
@@ -37,13 +37,13 @@ ROBOT_ID=wctestid bash scripts/install-local-native.sh
 如需安装指定版本：
 
 ```bash
-ROBOT_ID=wctestid VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-plugin-worktool/main/scripts/install.sh | bash
+ROBOT_ID=wctestid VERSION=0.2.1 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/install.sh | bash
 ```
 
 开发联调可用本地目录安装：
 
 ```bash
-openclaw plugins install /absolute/path/openclaw-plugin-worktool
+openclaw plugins install /absolute/path/openclaw-worktool
 ```
 
 ## 2. OpenClaw 配置
