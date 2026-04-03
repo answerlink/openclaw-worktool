@@ -29,7 +29,51 @@ if ! command -v docker >/dev/null 2>&1; then
   echo ""
 fi
 
-# ── 2) Check memory & swap ────────────────────────────
+# ── 2) Configure Docker registry mirrors (China) ─────
+DAEMON_JSON="/etc/docker/daemon.json"
+if [ -f "$DAEMON_JSON" ] && grep -q "registry-mirrors" "$DAEMON_JSON" 2>/dev/null; then
+  echo "Docker mirror: already configured."
+else
+  echo "Configuring Docker registry mirrors..."
+  mkdir -p /etc/docker
+  if [ -f "$DAEMON_JSON" ]; then
+    # Merge into existing config
+    node -e "\
+      const fs=require('fs');\
+      const p='$DAEMON_JSON';\
+      let c={}; try{c=JSON.parse(fs.readFileSync(p,'utf8'))}catch{};\
+      c['registry-mirrors']=c['registry-mirrors']||[\
+        'https://mirror.ccs.tencentyun.com',\
+        'https://docker.mirrors.ustc.edu.cn',\
+        'https://docker.1panel.live'\
+      ];\
+      fs.writeFileSync(p,JSON.stringify(c,null,2));" 2>/dev/null \
+    || cat > "$DAEMON_JSON" <<'MIRRORS'
+{
+  "registry-mirrors": [
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://docker.1panel.live"
+  ]
+}
+MIRRORS
+  else
+    cat > "$DAEMON_JSON" <<'MIRRORS'
+{
+  "registry-mirrors": [
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://docker.1panel.live"
+  ]
+}
+MIRRORS
+  fi
+  systemctl restart docker 2>/dev/null || service docker restart 2>/dev/null || true
+  echo "Docker mirror configured and daemon restarted."
+fi
+echo ""
+
+# ── 3) Check memory & swap ────────────────────────────
 TOTAL_MEM_MB="$(awk '/MemTotal/{printf "%d", $2/1024}' /proc/meminfo 2>/dev/null || echo 0)"
 TOTAL_SWAP_MB="$(awk '/SwapTotal/{printf "%d", $2/1024}' /proc/meminfo 2>/dev/null || echo 0)"
 
@@ -60,7 +104,7 @@ if [ "$TOTAL_MEM_MB" -gt 0 ] && [ "$TOTAL_MEM_MB" -lt "$MIN_MEM_MB" ]; then
   echo ""
 fi
 
-# ── 3) Download plugin source ─────────────────────────
+# ── 4) Download plugin source ─────────────────────────
 if [ -f "$INSTALL_DIR/openclaw.plugin.json" ]; then
   echo "Plugin source found at $INSTALL_DIR, updating..."
   if [ -d "$INSTALL_DIR/.git" ]; then
@@ -104,5 +148,5 @@ fi
 echo "Plugin source ready at $INSTALL_DIR"
 echo ""
 
-# ── 4) Delegate to setup-docker.sh ───────────────────
+# ── 5) Delegate to setup-docker.sh ───────────────────
 exec bash scripts/setup-docker.sh
