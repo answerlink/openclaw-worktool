@@ -7,7 +7,17 @@ OpenClaw 的 WorkTool 渠道插件，支持：
 
 ## 快速开始（推荐）
 
-只需 Docker 和一个 WorkTool 机器人 ID，从零到跑通：
+### Linux 云服务器（一行命令）
+
+SSH 到服务器，粘贴即可（自动安装 Docker、配置 swap、部署全部组件）：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/setup-remote.sh -o /tmp/oc-setup.sh && bash /tmp/oc-setup.sh
+```
+
+### 本地 Docker（Windows / macOS / Linux）
+
+需要先安装 [Docker Desktop](https://www.docker.com/products/docker-desktop/)，然后：
 
 ```bash
 git clone https://github.com/answerlink/openclaw-worktool.git
