@@ -36,8 +36,9 @@ load_env_file() {
     elif [ "${val#\'}" != "$val" ] && [ "${val%\'}" != "$val" ]; then
       val="${val#\'}"; val="${val%\'}"
     fi
-    [ -z "${!key:-}" ] && printf -v "$key" '%s' "$val" && export "$key"
+    [ -z "${!key:-}" ] && printf -v "$key" '%s' "$val" && export "$key" || true
   done < "$ENV_FILE"
+  return 0
 }
 
 # ── Interactive prompts ─────────────────────────────────
@@ -55,6 +56,7 @@ prompt_value() {
   fi
   local answer; IFS= read -r answer < /dev/tty
   [ -z "$answer" ] && answer="$default_value"
+  answer="${answer## }"; answer="${answer%% }"
   if [ -n "$answer" ]; then
     printf -v "$var_name" '%s' "$answer"; export "$var_name"; return 0
   fi
