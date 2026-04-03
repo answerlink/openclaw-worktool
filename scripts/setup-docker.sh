@@ -288,29 +288,52 @@ docker exec -u root "$CONTAINER_NAME" sh -c "chown -R node:node $CONTAINER_PLUGI
 STEP=$((STEP+1))
 echo "[$STEP/$TOTAL] Writing WorkTool channel config..."
 
-docker exec -u root "$CONTAINER_NAME" node -e "\
-  const fs=require('fs');\
-  const p='/home/node/.openclaw/openclaw.json';\
-  if(!fs.existsSync(p)){console.error('openclaw.json not found at '+p);process.exit(1);}\
-  const cfg=JSON.parse(fs.readFileSync(p,'utf8'));\
-  cfg.plugins=cfg.plugins||{};\
-  cfg.plugins.entries=cfg.plugins.entries||{};\
-  cfg.plugins.entries.worktool={enabled:true,config:{}};\
-  cfg.plugins.installs=cfg.plugins.installs||{};\
-  cfg.plugins.installs.worktool={source:'path',sourcePath:'$CONTAINER_PLUGIN_PATH'};\
-  cfg.plugins.allow=Array.isArray(cfg.plugins.allow)?cfg.plugins.allow:[];\
-  if(!cfg.plugins.allow.includes('worktool'))cfg.plugins.allow.push('worktool');\
-  cfg.channels=cfg.channels||{};\
-  cfg.channels.worktool={\
-    enabled:true,\
-    robotId:'$ROBOT_ID',\
-    bridgeBaseUrl:'$BRIDGE_BASE_URL',\
-    webhookHost:'$WEBHOOK_HOST',\
-    webhookPort:$WEBHOOK_PORT,\
-    webhookPath:'$WEBHOOK_PATH'\
-  };\
-  fs.writeFileSync(p,JSON.stringify(cfg,null,2));\
-  console.log('  openclaw.json updated');"
+PUBLIC_IP="$(curl -fsS --connect-timeout 5 ifconfig.me 2>/dev/null || echo "")"
+
+docker exec -u root \
+  -e "PLUGIN_PATH=$CONTAINER_PLUGIN_PATH" \
+  -e "ROBOT_ID=$ROBOT_ID" \
+  -e "BRIDGE_BASE_URL=$BRIDGE_BASE_URL" \
+  -e "WEBHOOK_HOST=$WEBHOOK_HOST" \
+  -e "WEBHOOK_PORT=$WEBHOOK_PORT" \
+  -e "WEBHOOK_PATH=$WEBHOOK_PATH" \
+  -e "GATEWAY_PORT=$GATEWAY_PORT" \
+  -e "PUBLIC_IP=$PUBLIC_IP" \
+  "$CONTAINER_NAME" node -e '
+  var fs=require("fs");
+  var p="/home/node/.openclaw/openclaw.json";
+  if(!fs.existsSync(p)){console.error("openclaw.json not found at "+p);process.exit(1);}
+  var cfg=JSON.parse(fs.readFileSync(p,"utf8"));
+  cfg.plugins=cfg.plugins||{};
+  cfg.plugins.entries=cfg.plugins.entries||{};
+  cfg.plugins.entries.worktool={enabled:true,config:{}};
+  cfg.plugins.installs=cfg.plugins.installs||{};
+  cfg.plugins.installs.worktool={source:"path",sourcePath:process.env.PLUGIN_PATH};
+  cfg.plugins.allow=Array.isArray(cfg.plugins.allow)?cfg.plugins.allow:[];
+  if(cfg.plugins.allow.indexOf("worktool")<0)cfg.plugins.allow.push("worktool");
+  cfg.channels=cfg.channels||{};
+  cfg.channels.worktool={
+    enabled:true,
+    robotId:process.env.ROBOT_ID,
+    bridgeBaseUrl:process.env.BRIDGE_BASE_URL,
+    webhookHost:process.env.WEBHOOK_HOST,
+    webhookPort:Number(process.env.WEBHOOK_PORT),
+    webhookPath:process.env.WEBHOOK_PATH
+  };
+  var gw=cfg.gateway=cfg.gateway||{};
+  gw.controlUi=gw.controlUi||{};
+  gw.controlUi.allowInsecureAuth=true;
+  gw.controlUi.dangerouslyDisableDeviceAuth=true;
+  var o=gw.controlUi.allowedOrigins||[];
+  var gp=process.env.GATEWAY_PORT;
+  ["http://127.0.0.1:"+gp,"http://localhost:"+gp].forEach(function(u){if(o.indexOf(u)<0)o.push(u)});
+  var pub=process.env.PUBLIC_IP;
+  if(pub){var pu="http://"+pub+":"+gp;if(o.indexOf(pu)<0)o.push(pu);}
+  gw.controlUi.allowedOrigins=o;
+  fs.writeFileSync(p,JSON.stringify(cfg,null,2));
+  console.log("  openclaw.json updated");
+  if(pub)console.log("  public access: http://"+pub+":"+gp);
+'
 
 # ── Phase 9: Restart & verify ─────────────────────────
 STEP=$((STEP+1))
@@ -337,6 +360,9 @@ if [ "$OK" = "1" ]; then
   echo ""
   echo "  Webhook : $result"
   echo "  Gateway : http://127.0.0.1:$GATEWAY_PORT"
+  if [ -n "$PUBLIC_IP" ]; then
+    echo "  Public  : http://$PUBLIC_IP:$GATEWAY_PORT"
+  fi
 else
   echo "  Plugin installed. Webhook still starting up..."
   echo "=============================================="
@@ -345,8 +371,13 @@ else
 fi
 
 echo ""
-echo "  Next step: set callback URL in WorkTool dashboard:"
-echo "    https://<your-public-domain>$WEBHOOK_PATH?robotId=$ROBOT_ID"
+if [ -n "$PUBLIC_IP" ]; then
+  echo "  Next step: set callback URL in WorkTool dashboard:"
+  echo "    http://$PUBLIC_IP:$WEBHOOK_PORT$WEBHOOK_PATH?robotId=$ROBOT_ID"
+else
+  echo "  Next step: set callback URL in WorkTool dashboard:"
+  echo "    https://<your-public-domain>$WEBHOOK_PATH?robotId=$ROBOT_ID"
+fi
 echo ""
 echo "  Config saved to $ENV_FILE (rerun script to upgrade/reconfigure)."
 echo ""
