@@ -68,16 +68,27 @@ if [ -f "$INSTALL_DIR/openclaw.plugin.json" ]; then
     git pull --ff-only 2>/dev/null || echo "  git pull failed, using existing files."
   fi
 else
+  CLONE_OK=0
+
   if command -v git >/dev/null 2>&1; then
     echo "Cloning plugin repository..."
     rm -rf "$INSTALL_DIR"
-    git clone --depth 1 "https://github.com/${REPO}.git" "$INSTALL_DIR"
-  else
-    echo "Downloading plugin source..."
+    git clone --depth 1 "https://github.com/${REPO}.git" "$INSTALL_DIR" && CLONE_OK=1 || {
+      echo "  git clone failed, trying tarball download..."
+    }
+  fi
+
+  if [ "$CLONE_OK" = "0" ]; then
+    echo "Downloading plugin source (tarball)..."
     TMP_TAR="$(mktemp)"
-    curl -fsSL "https://github.com/${REPO}/archive/refs/heads/main.tar.gz" -o "$TMP_TAR"
     rm -rf "$INSTALL_DIR"
     mkdir -p "$INSTALL_DIR"
+
+    # Try GitHub directly, then ghproxy mirror for China servers
+    curl -fsSL --connect-timeout 15 "https://github.com/${REPO}/archive/refs/heads/main.tar.gz" -o "$TMP_TAR" 2>/dev/null \
+      || curl -fsSL --connect-timeout 15 "https://ghfast.top/https://github.com/${REPO}/archive/refs/heads/main.tar.gz" -o "$TMP_TAR" 2>/dev/null \
+      || { echo "Download failed. Check network and retry."; exit 1; }
+
     tar xzf "$TMP_TAR" --strip-components=1 -C "$INSTALL_DIR"
     rm -f "$TMP_TAR"
   fi
