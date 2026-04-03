@@ -175,6 +175,7 @@ fi
 if [ "$NEED_CREATE" = "1" ]; then
   echo "  Creating container '$CONTAINER_NAME'..."
   mkdir -p "$OPENCLAW_HOME"
+  chmod 777 "$OPENCLAW_HOME"
   docker create \
     --name "$CONTAINER_NAME" \
     --restart unless-stopped \
@@ -206,6 +207,8 @@ else
 fi
 
 if [ "$RUN_ONBOARD" = "1" ]; then
+  mkdir -p "$OPENCLAW_HOME"
+  chmod 777 "$OPENCLAW_HOME"
   echo ""
   echo "  Launching OpenClaw onboard..."
   echo "  (Select your model provider, gateway bind, auth token, etc.)"
