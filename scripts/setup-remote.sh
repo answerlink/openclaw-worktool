@@ -3,13 +3,13 @@ set -euo pipefail
 
 # ── One-liner for Linux cloud servers ───────────────────
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/setup-remote.sh -o /tmp/oc-setup.sh && bash /tmp/oc-setup.sh
+#   curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/setup-remote.sh -o /tmp/oc-setup.sh; bash /tmp/oc-setup.sh
 #
 # With pre-set variables (non-interactive):
 #   ROBOT_ID=xxx SKIP_ONBOARD=1 bash /tmp/oc-setup.sh
 
 REPO="answerlink/openclaw-worktool"
-INSTALL_DIR="${INSTALL_DIR:-/opt/openclaw-worktool}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/openclaw-worktool}"
 MIN_MEM_MB="${MIN_MEM_MB:-3500}"
 SWAP_SIZE="${SWAP_SIZE:-4G}"
 
@@ -61,17 +61,13 @@ if [ "$TOTAL_MEM_MB" -gt 0 ] && [ "$TOTAL_MEM_MB" -lt "$MIN_MEM_MB" ]; then
 fi
 
 # ── 3) Download plugin source ─────────────────────────
-if [ -d "$INSTALL_DIR/.git" ]; then
-  echo "Updating existing installation at $INSTALL_DIR..."
-  cd "$INSTALL_DIR"
-  git pull --ff-only 2>/dev/null || {
-    echo "git pull failed, re-downloading..."
-    cd /
-    rm -rf "$INSTALL_DIR"
-  }
-fi
-
-if [ ! -d "$INSTALL_DIR/openclaw.plugin.json" ] 2>/dev/null; then
+if [ -f "$INSTALL_DIR/openclaw.plugin.json" ]; then
+  echo "Plugin source found at $INSTALL_DIR, updating..."
+  if [ -d "$INSTALL_DIR/.git" ]; then
+    cd "$INSTALL_DIR"
+    git pull --ff-only 2>/dev/null || echo "  git pull failed, using existing files."
+  fi
+else
   if command -v git >/dev/null 2>&1; then
     echo "Cloning plugin repository..."
     rm -rf "$INSTALL_DIR"
@@ -80,6 +76,7 @@ if [ ! -d "$INSTALL_DIR/openclaw.plugin.json" ] 2>/dev/null; then
     echo "Downloading plugin source..."
     TMP_TAR="$(mktemp)"
     curl -fsSL "https://github.com/${REPO}/archive/refs/heads/main.tar.gz" -o "$TMP_TAR"
+    rm -rf "$INSTALL_DIR"
     mkdir -p "$INSTALL_DIR"
     tar xzf "$TMP_TAR" --strip-components=1 -C "$INSTALL_DIR"
     rm -f "$TMP_TAR"
