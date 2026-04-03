@@ -239,6 +239,7 @@ fi
 # ── Phase 6: Copy plugin source into container ────────
 STEP=$((STEP+1))
 echo "[$STEP/$TOTAL] Copying plugin files into container..."
+docker exec -u root "$CONTAINER_NAME" mkdir -p "$CONTAINER_PLUGIN_PATH"
 docker cp "$PLUGIN_SOURCE_DIR/index.js"             "$CONTAINER_NAME:$CONTAINER_PLUGIN_PATH/index.js"
 docker cp "$PLUGIN_SOURCE_DIR/openclaw.plugin.json"  "$CONTAINER_NAME:$CONTAINER_PLUGIN_PATH/openclaw.plugin.json"
 docker cp "$PLUGIN_SOURCE_DIR/package.json"          "$CONTAINER_NAME:$CONTAINER_PLUGIN_PATH/package.json"
