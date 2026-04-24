@@ -19,6 +19,72 @@ echo "  OpenClaw + WorkTool — Remote Setup"
 echo "=============================================="
 echo ""
 
+# ── 0) Pre-check: existing OpenClaw environment ────────
+OPENCLAW_HOME="${OPENCLAW_HOME:-$HOME/.openclaw}"
+PRECHECK_WARN=0
+
+if command -v docker >/dev/null 2>&1; then
+  EXISTING_CONTAINERS="$(docker ps -a --format '{{.Names}}\t{{.Image}}\t{{.Status}}' 2>/dev/null | grep -i 'openclaw' || true)"
+  if [ -n "$EXISTING_CONTAINERS" ]; then
+    echo "  ⚠️  Found existing OpenClaw container(s):"
+    echo "$EXISTING_CONTAINERS" | while IFS=$'\t' read -r name image status; do
+      echo "     - $name  ($image)  [$status]"
+    done
+    PRECHECK_WARN=1
+  fi
+fi
+
+if [ -d "$OPENCLAW_HOME/extensions" ]; then
+  EXT_LIST="$(ls "$OPENCLAW_HOME/extensions" 2>/dev/null | grep -v '^worktool$' || true)"
+  if [ -n "$EXT_LIST" ]; then
+    echo "  ⚠️  Found third-party plugins in $OPENCLAW_HOME/extensions:"
+    echo "$EXT_LIST" | while read -r ext; do echo "     - $ext"; done
+    echo "     These may be incompatible and cause startup failures."
+    PRECHECK_WARN=1
+  fi
+fi
+
+if [ "$PRECHECK_WARN" = "1" ] && [ -r /dev/tty ] && [ -w /dev/tty ]; then
+  echo ""
+  echo "  Options:"
+  echo "    [1] Continue anyway"
+  echo "    [2] Backup & hide incompatible plugins (move extensions to extensions.bak)"
+  echo "    [3] Full clean reset (remove container + delete ~/.openclaw)"
+  echo "    [4] Abort"
+  echo ""
+  printf "  Your choice [1/2/3/4]: " > /dev/tty
+  CHOICE=""; IFS= read -r CHOICE < /dev/tty
+  CHOICE="${CHOICE## }"; CHOICE="${CHOICE%% }"
+  case "$CHOICE" in
+    1) echo "  Continuing..." ;;
+    2)
+      [ -d "$OPENCLAW_HOME/extensions" ] && mv "$OPENCLAW_HOME/extensions" "$OPENCLAW_HOME/extensions.bak.$(date +%Y%m%d%H%M%S)" && echo "  Extensions backed up."
+      if command -v docker >/dev/null 2>&1; then
+        docker ps -a --format '{{.Names}}' 2>/dev/null | grep -i 'openclaw' | while read -r c; do
+          docker stop "$c" >/dev/null 2>&1 || true
+          docker rm "$c" >/dev/null 2>&1 || true
+          echo "  Removed container: $c"
+        done
+      fi
+      ;;
+    3)
+      if command -v docker >/dev/null 2>&1; then
+        docker ps -a --format '{{.Names}}' 2>/dev/null | grep -i 'openclaw' | while read -r c; do
+          docker stop "$c" >/dev/null 2>&1 || true
+          docker rm "$c" >/dev/null 2>&1 || true
+          echo "  Removed container: $c"
+        done
+      fi
+      [ -d "$OPENCLAW_HOME" ] && rm -rf "$OPENCLAW_HOME" && echo "  ~/.openclaw deleted."
+      ;;
+    4|*) echo "  Aborted."; exit 0 ;;
+  esac
+  echo ""
+elif [ "$PRECHECK_WARN" = "0" ]; then
+  echo "  No conflicts detected."
+  echo ""
+fi
+
 # ── 1) Check Docker ────────────────────────────────────
 if ! command -v docker >/dev/null 2>&1; then
   echo "Docker not found. Installing via official script..."
