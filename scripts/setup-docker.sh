@@ -103,6 +103,94 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
+# ── Environment pre-check ───────────────────────────────
+echo ""
+echo "-- Pre-check: existing OpenClaw environment --"
+echo ""
+
+PRECHECK_WARN=0
+
+# 1) Check existing openclaw containers
+EXISTING_CONTAINERS="$(docker ps -a --format '{{.Names}}\t{{.Image}}\t{{.Status}}' 2>/dev/null | grep -i 'openclaw' || true)"
+if [ -n "$EXISTING_CONTAINERS" ]; then
+  echo "  ⚠️  Found existing OpenClaw container(s):"
+  echo "$EXISTING_CONTAINERS" | while IFS=$'\t' read -r name image status; do
+    echo "     - $name  ($image)  [$status]"
+    if [ "$image" != "$OPENCLAW_IMAGE" ]; then
+      echo "       ↳ Version mismatch! This script will install: $OPENCLAW_IMAGE"
+    fi
+  done
+  PRECHECK_WARN=1
+fi
+
+# 2) Check ~/.openclaw/extensions for third-party plugins
+if [ -d "$OPENCLAW_HOME/extensions" ]; then
+  EXT_LIST="$(ls "$OPENCLAW_HOME/extensions" 2>/dev/null | grep -v '^worktool$' || true)"
+  if [ -n "$EXT_LIST" ]; then
+    echo "  ⚠️  Found third-party plugins in $OPENCLAW_HOME/extensions:"
+    echo "$EXT_LIST" | while read -r ext; do
+      echo "     - $ext"
+    done
+    echo "     These plugins may be incompatible with $OPENCLAW_IMAGE and cause startup failures."
+    PRECHECK_WARN=1
+  fi
+fi
+
+# 3) If warnings found, let user decide
+if [ "$PRECHECK_WARN" = "1" ] && has_tty; then
+  echo ""
+  echo "  Options:"
+  echo "    [1] Continue anyway (existing plugins stay, may cause issues)"
+  echo "    [2] Backup & hide incompatible plugins (move extensions to extensions.bak)"
+  echo "    [3] Full clean reset (remove container + ~/.openclaw, start fresh)"
+  echo "    [4] Abort"
+  echo ""
+  printf "  Your choice [1/2/3/4]: " > /dev/tty
+  CHOICE=""; IFS= read -r CHOICE < /dev/tty
+  CHOICE="${CHOICE## }"; CHOICE="${CHOICE%% }"
+
+  case "$CHOICE" in
+    1)
+      echo "  Continuing with existing environment..."
+      ;;
+    2)
+      echo "  Backing up extensions..."
+      if [ -d "$OPENCLAW_HOME/extensions" ]; then
+        mv "$OPENCLAW_HOME/extensions" "$OPENCLAW_HOME/extensions.bak.$(date +%Y%m%d%H%M%S)"
+        echo "  Extensions moved to extensions.bak.*"
+      fi
+      if [ -n "$EXISTING_CONTAINERS" ]; then
+        CONTAINER_TO_STOP="$(docker ps -a --format '{{.Names}}' | grep -i 'openclaw' | head -1 || true)"
+        if [ -n "$CONTAINER_TO_STOP" ]; then
+          docker stop "$CONTAINER_TO_STOP" >/dev/null 2>&1 || true
+          docker rm "$CONTAINER_TO_STOP" >/dev/null 2>&1 || true
+          echo "  Old container removed."
+        fi
+      fi
+      ;;
+    3)
+      echo "  Full clean reset..."
+      docker ps -a --format '{{.Names}}' 2>/dev/null | grep -i 'openclaw' | while read -r c; do
+        docker stop "$c" >/dev/null 2>&1 || true
+        docker rm "$c" >/dev/null 2>&1 || true
+        echo "  Removed container: $c"
+      done
+      if [ -d "$OPENCLAW_HOME" ]; then
+        rm -rf "$OPENCLAW_HOME"
+        echo "  ~/.openclaw deleted."
+      fi
+      ;;
+    4|*)
+      echo "  Aborted."
+      exit 0
+      ;;
+  esac
+  echo ""
+elif [ "$PRECHECK_WARN" = "0" ]; then
+  echo "  No conflicts detected. Proceeding..."
+  echo ""
+fi
+
 # ── Main ────────────────────────────────────────────────
 echo ""
 echo "=============================================="
