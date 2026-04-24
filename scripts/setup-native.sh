@@ -243,6 +243,39 @@ cp -rf "$INSTALL_DIR/src"                  "$PLUGIN_DEST/src"
 
 echo "  Plugin files copied to $PLUGIN_DEST"
 
+# Create SDK shim — link global openclaw package into plugin's node_modules
+OPENCLAW_PKG_DIR="$(npm root -g 2>/dev/null)/openclaw"
+if [ -d "$OPENCLAW_PKG_DIR" ]; then
+  mkdir -p "$PLUGIN_DEST/node_modules"
+  ln -sf "$OPENCLAW_PKG_DIR" "$PLUGIN_DEST/node_modules/openclaw"
+  echo "  SDK shim linked: $OPENCLAW_PKG_DIR"
+else
+  echo "  WARNING: Could not find global openclaw package at $OPENCLAW_PKG_DIR"
+  echo "           Plugin may fail to load. Try: npm root -g"
+fi
+
+# Apply compatibility patches (same as Docker setup)
+node -e "
+  const fs = require('fs');
+  let ch = fs.readFileSync('$PLUGIN_DEST/src/channel.js', 'utf8');
+  if (/import\s*\{[^}]*DEFAULT_ACCOUNT_ID/.test(ch)) {
+    ch = ch.replace(
+      /import\s*\{[^}]*DEFAULT_ACCOUNT_ID[^}]*\}\s*from\s*['\"]openclaw\/plugin-sdk['\"];?/,
+      'const DEFAULT_ACCOUNT_ID = \"default\";');
+    fs.writeFileSync('$PLUGIN_DEST/src/channel.js', ch);
+    console.log('  channel.js: DEFAULT_ACCOUNT_ID patched');
+  } else { console.log('  channel.js: already patched'); }
+
+  let ib = fs.readFileSync('$PLUGIN_DEST/src/inbound.js', 'utf8');
+  if (/import\s*\{[^}]*createReplyPrefixContext/.test(ib)) {
+    ib = ib.replace(
+      /import\s*\{[^}]*createReplyPrefixContext[^}]*\}\s*from\s*['\"]openclaw\/plugin-sdk['\"];?/,
+      'function createReplyPrefixContext({cfg,agentId}){return{responsePrefix:undefined,responsePrefixContextProvider:undefined};}');
+    fs.writeFileSync('$PLUGIN_DEST/src/inbound.js', ib);
+    console.log('  inbound.js: createReplyPrefixContext patched');
+  } else { console.log('  inbound.js: already patched'); }
+" 2>/dev/null || echo "  Compatibility patches skipped (node not found in PATH yet)"
+
 # ── Step 7: Write worktool config into openclaw.json ────
 echo "[7] Writing WorkTool config into openclaw.json..."
 
@@ -288,6 +321,7 @@ cfg['channels']['worktool'] = {
 
 # Gateway control UI
 gw = cfg.setdefault('gateway', {})
+gw['mode'] = 'local'
 gw.setdefault('port', int('$GATEWAY_PORT'))
 ui = gw.setdefault('controlUi', {})
 ui['allowInsecureAuth'] = True

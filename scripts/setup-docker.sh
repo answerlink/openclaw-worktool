@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ── Defaults ────────────────────────────────────────────
-OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-alpine/openclaw:2026.3.28}"
+OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-alpine/openclaw:latest}"
 CONTAINER_NAME="${CONTAINER_NAME:-openclaw-gateway}"
 GATEWAY_PORT="${GATEWAY_PORT:-18789}"
 ROBOT_ID="${ROBOT_ID:-}"
