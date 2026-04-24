@@ -9,24 +9,28 @@ OpenClaw 的 WorkTool 渠道插件，支持：
 
 > **服务器配置要求：2 核 4 GB 内存及以上**（内存不足时脚本会自动配置 swap，但仍建议 4GB+）。
 
-### 方式一：Docker 一键安装（推荐）
+### 方式一：Docker 一键安装 — OpenClaw 2026.3.28（稳定版）
 
-SSH 到云服务器，粘贴即可。自动安装 Docker、拉取最新 OpenClaw 镜像、部署全部组件：
+SSH 到云服务器，粘贴即可。自动安装 Docker、部署全部组件：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/setup-remote.sh -o /tmp/oc-setup.sh; bash /tmp/oc-setup.sh
 ```
 
-特点：
+### 方式二：Docker 一键安装 — OpenClaw 2026.4.22+（最新版）
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/setup-remote-latest.sh -o /tmp/oc-setup.sh; bash /tmp/oc-setup.sh
+```
+
+两种方式特点：
 - 自动安装 Docker（如未安装）
-- 始终拉取最新稳定版 OpenClaw（`alpine/openclaw:latest`）
 - 隔离运行，不污染系统环境
-- SDK 兼容层与版本补丁自动处理
 - 配置保存到 `.env`，重新运行脚本即可升级
 
-### 方式二：官网原生安装
+### 方式三：官网原生安装（无需 Docker）
 
-使用 [OpenClaw 官网](https://openclaw.ai) 安装脚本，直接安装到系统（无需 Docker）：
+使用 [OpenClaw 官网](https://openclaw.ai) 安装脚本，直接安装到系统：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/scripts/setup-native.sh -o /tmp/oc-setup.sh; bash /tmp/oc-setup.sh
@@ -36,7 +40,6 @@ curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/s
 - 通过 `curl -fsSL https://openclaw.ai/install.sh | bash` 安装最新稳定版 OpenClaw
 - 注册为 systemd 服务，开机自启
 - 无需 Docker，适合不想装 Docker 的环境
-- 重新运行脚本即可升级到最新版
 
 ---
 
@@ -47,7 +50,12 @@ curl -fsSL https://raw.githubusercontent.com/answerlink/openclaw-worktool/main/s
 ```bash
 git clone https://github.com/answerlink/openclaw-worktool.git
 cd openclaw-worktool
+
+# OpenClaw 2026.3.28（稳定版）
 bash scripts/setup-docker.sh
+
+# OpenClaw 2026.4.22+（最新版）
+bash scripts/setup-docker-latest.sh
 ```
 
 脚本会自动完成全部流程：
@@ -64,31 +72,31 @@ bash scripts/setup-docker.sh
 第二次运行（升级/改配置）：
 
 ```bash
-bash scripts/setup-docker.sh
-# .env 中已有 ROBOT_ID 等值，直接跑完；onboard 会问你是否要重新配模型
+bash scripts/setup-docker.sh        # 3.28 版本
+bash scripts/setup-docker-latest.sh # 4.22+ 版本
 ```
 
 也可环境变量全传，跳过交互（适合 CI）：
 
 ```bash
-ROBOT_ID=wctestid SKIP_ONBOARD=1 bash scripts/setup-docker.sh
+ROBOT_ID=wctestid SKIP_ONBOARD=1 bash scripts/setup-docker-latest.sh
 ```
 
 可覆盖参数：
 
-| 变量 | 默认值 | 说明 |
-|---|---|---|
-| `ROBOT_ID` | (必填) | WorkTool 机器人 ID |
-| `OPENCLAW_IMAGE` | `alpine/openclaw:latest` | OpenClaw Docker 镜像 |
-| `CONTAINER_NAME` | `openclaw-gateway` | 容器名 |
-| `GATEWAY_PORT` | `18789` | OpenClaw 网关端口 |
-| `BRIDGE_BASE_URL` | `https://api.worktool.ymdyes.cn` | WorkTool Bridge 地址 |
-| `WEBHOOK_HOST` | `0.0.0.0` | Webhook 监听地址 |
-| `WEBHOOK_PORT` | `18799` | Webhook 端口 |
-| `WEBHOOK_PATH` | `/wechat/webhook` | Webhook 路径 |
-| `SKIP_ONBOARD` | (空) | 设为 `1` 跳过 onboard |
-| `ENV_FILE` | `./.env` | 配置文件路径 |
-| `PLUGIN_SOURCE_DIR` | 自动检测 | 插件源码目录 |
+| 变量 | 默认值（3.28） | 默认值（latest） | 说明 |
+|---|---|---|---|
+| `ROBOT_ID` | (必填) | (必填) | WorkTool 机器人 ID |
+| `OPENCLAW_IMAGE` | `alpine/openclaw:2026.3.28` | `alpine/openclaw:latest` | OpenClaw Docker 镜像 |
+| `CONTAINER_NAME` | `openclaw-gateway` | `openclaw-gateway` | 容器名 |
+| `GATEWAY_PORT` | `18789` | `18789` | OpenClaw 网关端口 |
+| `BRIDGE_BASE_URL` | `https://api.worktool.ymdyes.cn` | `https://api.worktool.ymdyes.cn` | WorkTool Bridge 地址 |
+| `WEBHOOK_HOST` | `0.0.0.0` | `0.0.0.0` | Webhook 监听地址 |
+| `WEBHOOK_PORT` | `18799` | `18799` | Webhook 端口 |
+| `WEBHOOK_PATH` | `/wechat/webhook` | `/wechat/webhook` | Webhook 路径 |
+| `SKIP_ONBOARD` | (空) | (空) | 设为 `1` 跳过 onboard |
+| `ENV_FILE` | `./.env` | `./.env` | 配置文件路径 |
+| `PLUGIN_SOURCE_DIR` | 自动检测 | 自动检测 | 插件源码目录 |
 
 ## 其他安装方式
 
