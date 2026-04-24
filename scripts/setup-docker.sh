@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ── Defaults ────────────────────────────────────────────
-OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-alpine/openclaw:latest}"
+OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-alpine/openclaw:2026.3.28}"
 CONTAINER_NAME="${CONTAINER_NAME:-openclaw-gateway}"
 GATEWAY_PORT="${GATEWAY_PORT:-18789}"
 ROBOT_ID="${ROBOT_ID:-}"
@@ -11,7 +11,7 @@ WEBHOOK_HOST="${WEBHOOK_HOST:-0.0.0.0}"
 WEBHOOK_PORT="${WEBHOOK_PORT:-18799}"
 WEBHOOK_PATH="${WEBHOOK_PATH:-/wechat/webhook}"
 ENV_FILE="${ENV_FILE:-./.env}"
-CONTAINER_PLUGIN_PATH="/app/dist/extensions/worktool"
+CONTAINER_PLUGIN_PATH="/app/extensions/worktool"
 HEALTH_WAIT="${HEALTH_WAIT:-30}"
 SKIP_ONBOARD="${SKIP_ONBOARD:-}"
 
@@ -244,12 +244,24 @@ docker cp "$PLUGIN_SOURCE_DIR/index.js"             "$CONTAINER_NAME:$CONTAINER_
 docker cp "$PLUGIN_SOURCE_DIR/openclaw.plugin.json"  "$CONTAINER_NAME:$CONTAINER_PLUGIN_PATH/openclaw.plugin.json"
 docker cp "$PLUGIN_SOURCE_DIR/package.json"          "$CONTAINER_NAME:$CONTAINER_PLUGIN_PATH/package.json"
 docker cp "$PLUGIN_SOURCE_DIR/src"                   "$CONTAINER_NAME:$CONTAINER_PLUGIN_PATH/src"
-docker exec -u root "$CONTAINER_NAME" sh -c "chown -R node:node $CONTAINER_PLUGIN_PATH"
 
-# ── Phase 7: Compatibility patches ────────────────────
-# No SDK shim needed — /app/dist/extensions/node_modules/openclaw already exists in image
+# ── Phase 7: SDK shim + compatibility patches ─────────
 STEP=$((STEP+1))
-echo "[$STEP/$TOTAL] Patching compatibility..."
+echo "[$STEP/$TOTAL] Creating SDK shim & patching compatibility..."
+
+docker exec -u root "$CONTAINER_NAME" sh -c "chmod -R 755 $CONTAINER_PLUGIN_PATH"
+
+docker exec -u root "$CONTAINER_NAME" sh -c "\
+  mkdir -p $CONTAINER_PLUGIN_PATH/node_modules/openclaw/plugin-sdk && \
+  cp -a /app/dist/plugin-sdk/* $CONTAINER_PLUGIN_PATH/node_modules/openclaw/plugin-sdk/"
+
+docker exec -u root "$CONTAINER_NAME" node -e "\
+  require('fs').writeFileSync(\
+    '$CONTAINER_PLUGIN_PATH/node_modules/openclaw/package.json',\
+    JSON.stringify({name:'openclaw',type:'module',exports:{\
+      './plugin-sdk':'./plugin-sdk/index.js',\
+      './plugin-sdk/*':'./plugin-sdk/*'\
+    }},null,2))"
 
 docker exec -u root "$CONTAINER_NAME" node -e "\
   const fs=require('fs');\
@@ -269,6 +281,8 @@ docker exec -u root "$CONTAINER_NAME" node -e "\
     fs.writeFileSync('$CONTAINER_PLUGIN_PATH/src/inbound.js',ib);\
     console.log('  inbound.js: createReplyPrefixContext patched');\
   }else{console.log('  inbound.js: already patched');}"
+
+docker exec -u root "$CONTAINER_NAME" sh -c "chown -R node:node $CONTAINER_PLUGIN_PATH"
 
 # ── Phase 8: Write worktool config into openclaw.json ──
 STEP=$((STEP+1))
